@@ -1,0 +1,68 @@
+import java.util.Arrays;
+
+class Process {
+    int AT, BT, FT, WT, TAT, pos;
+    int[] ST = new int[20];
+
+    public Process() {
+        Arrays.fill(ST, -1);
+    }
+}
+
+public class RoundRobin {
+    static int quant = 2;
+
+    public static void main(String[] args) {
+        int n = 5;
+        Process[] p = new Process[n];
+        int[] arrivalTimes = {0, 1, 2, 3, 4};
+        int[] burstTimes = {5, 3, 1, 2, 3};
+        for (int i = 0; i < n; i++) {
+            p[i] = new Process();
+            p[i].pos = i + 1;
+            p[i].AT = arrivalTimes[i];
+            p[i].BT = burstTimes[i];
+        }
+
+        int[] remainingBT = Arrays.copyOf(burstTimes, n);
+        float time = 0;
+        int completed = 0, totalWT = 0, totalTAT = 0;
+
+        while (completed < n) {
+            boolean found = false;
+            for (int i = 0; i < n; i++) {
+                if (p[i].AT <= time && remainingBT[i] > 0) {
+                    found = true;
+                    int startIdx = 0;
+                    while (p[i].ST[startIdx] != -1) startIdx++;
+                    p[i].ST[startIdx] = (int) time;
+                    
+                    if (remainingBT[i] <= quant) {
+                        time += remainingBT[i];
+                        remainingBT[i] = 0;
+                        p[i].FT = (int) time;
+                        p[i].WT = p[i].FT - p[i].AT - p[i].BT;
+                        p[i].TAT = p[i].BT + p[i].WT;
+                        totalWT += p[i].WT;
+                        totalTAT += p[i].TAT;
+                        completed++;
+                    } else {
+                        time += quant;
+                        remainingBT[i] -= quant;
+                    }
+                }
+            }
+            if (!found) time++;
+        }
+
+        System.out.println("Process  AT  BT  Start Times        FT   WT   TAT");
+        System.out.println("---------------------------------------------------");
+        for (Process proc : p) {
+            System.out.printf("%7d%4d%4d", proc.pos, proc.AT, proc.BT);
+            for (int t : proc.ST) if (t != -1) System.out.printf("%4d", t);
+            System.out.printf("%10d%5d%6d\n", proc.FT, proc.WT, proc.TAT);
+        }
+        System.out.printf("Average WT: %.2f\n", totalWT / (double) n);
+        System.out.printf("Average TAT: %.2f\n", totalTAT / (double) n);
+    }
+}

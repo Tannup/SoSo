@@ -1,0 +1,72 @@
+import java.util.Scanner;
+
+class MatrixTask implements Runnable {
+    private final int[][] matA, matB, result;
+    private final int row, col, size;
+
+    MatrixTask(int[][] matA, int[][] matB, int[][] result, int row, int col, int size) {
+        this.matA = matA;
+        this.matB = matB;
+        this.result = result;
+        this.row = row;
+        this.col = col;
+        this.size = size;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i < size; i++) {
+            result[row][col] += matA[row][i] * matB[i][col];
+        }
+    }
+}
+
+public class MatrixMultiplicationWithThreads {
+    public static void main(String[] args) throws InterruptedException {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter matrix size (n x n): ");
+        int size = sc.nextInt();
+
+        int[][] matA = new int[size][size];
+        int[][] matB = new int[size][size];
+        int[][] result = new int[size][size];
+
+        System.out.println("Enter Matrix A:");
+        inputMatrix(sc, matA);
+        System.out.println("Enter Matrix B:");
+        inputMatrix(sc, matB);
+
+        Thread[] threads = new Thread[size * size];
+        for (int i = 0, idx = 0; i < size; i++) {
+            for (int j = 0; j < size; j++, idx++) {
+                threads[idx] = new Thread(new MatrixTask(matA, matB, result, i, j, size));
+                threads[idx].start();
+            }
+        }
+
+        for (Thread thread : threads) {
+            thread.join();
+        }
+
+        System.out.println("Resultant Matrix:");
+        printMatrix(result);
+        sc.close();
+    }
+
+    private static void inputMatrix(Scanner sc, int[][] matrix) {
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                matrix[i][j] = sc.nextInt();
+            }
+        }
+    }
+
+    private static void printMatrix(int[][] matrix) {
+        for (int[] row : matrix) {
+            for (int val : row) {
+                System.out.print(val + " ");
+            }
+            System.out.println();
+        }
+    }
+}

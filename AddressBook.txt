@@ -1,0 +1,27 @@
+#!/bin/bash
+
+file="address_book.txt"
+
+menu() {
+    echo -e "a) Create\nb) View\nc) Insert\nd) Delete\ne) Modify\nf) Exit"
+}
+
+create() { > $file && echo "Address book created."; }
+view() { [[ -s $file ]] && cat $file || echo "Address book is empty."; }
+insert() { read -p "Name: " name; read -p "Phone: " phone; read -p "Email: " email; echo "$name | $phone | $email" >> $file; }
+delete() { read -p "Name to delete: " name; grep -v "$name" $file > tmp && mv tmp $file && echo "Record deleted."; }
+modify() { delete; insert; }
+
+while :; do
+    menu
+    read -p "Choose an option: " opt
+    case $opt in
+        a) create ;;
+        b) view ;;
+        c) insert ;;
+        d) delete ;;
+        e) modify ;;
+        f) exit ;;
+        *) echo "Invalid option" ;;
+    esac
+done

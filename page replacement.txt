@@ -1,0 +1,88 @@
+import java.util.*;
+
+public class PageReplacement {
+
+    // FIFO Page Replacement Algorithm
+    public static int fifo(int[] pages, int frames) {
+        Queue<Integer> queue = new LinkedList<>();
+        Set<Integer> set = new HashSet<>();
+        int faults = 0;
+
+        for (int page : pages) {
+            if (!set.contains(page)) {
+                faults++;
+                if (set.size() == frames) set.remove(queue.poll());
+                set.add(page);
+                queue.add(page);
+            }
+        }
+        return faults;
+    }
+
+    // LRU Page Replacement Algorithm
+    public static int lru(int[] pages, int frames) {
+        List<Integer> list = new ArrayList<>();
+        int faults = 0;
+
+        for (int page : pages) {
+            if (!list.contains(page)) {
+                faults++;
+                if (list.size() == frames) list.remove(0);
+            } else {
+                list.remove((Integer) page);
+            }
+            list.add(page);
+        }
+        return faults;
+    }
+
+    // Optimal Page Replacement Algorithm
+    public static int optimal(int[] pages, int frames) {
+        Set<Integer> set = new HashSet<>();
+        int faults = 0;
+
+        for (int i = 0; i < pages.length; i++) {
+            if (!set.contains(pages[i])) {
+                faults++;
+                if (set.size() == frames) {
+                    int farthest = -1, victim = -1;
+                    for (int page : set) {
+                        int nextUse = findNextUse(pages, i, page);
+                        if (nextUse == -1) {
+                            victim = page;
+                            break;
+                        } else if (nextUse > farthest) {
+                            farthest = nextUse;
+                            victim = page;
+                        }
+                    }
+                    set.remove(victim);
+                }
+                set.add(pages[i]);
+            }
+        }
+        return faults;
+    }
+
+    private static int findNextUse(int[] pages, int currentIndex, int page) {
+        for (int i = currentIndex + 1; i < pages.length; i++) {
+            if (pages[i] == page) return i;
+        }
+        return -1;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter number of pages: ");
+        int n = sc.nextInt();
+        int[] pages = new int[n];
+        System.out.print("Enter reference string: ");
+        for (int i = 0; i < n; i++) pages[i] = sc.nextInt();
+        System.out.print("Enter number of frames: ");
+        int frames = sc.nextInt();
+
+        System.out.println("FIFO Page Faults: " + fifo(pages, frames));
+        System.out.println("LRU Page Faults: " + lru(pages, frames));
+        System.out.println("Optimal Page Faults: " + optimal(pages, frames));
+    }
+}

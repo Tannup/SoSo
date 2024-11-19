@@ -1,0 +1,77 @@
+import java.util.*;
+
+public class DiskSchedulingAlgorithms {
+
+    // Function for SSTF
+    public static int sstf(int[] requests, int head) {
+        int totalMovement = 0;
+        boolean[] visited = new boolean[requests.length];
+
+        for (int i = 0; i < requests.length; i++) {
+            int minDistance = Integer.MAX_VALUE, closestRequestIndex = -1;
+            for (int j = 0; j < requests.length; j++) {
+                if (!visited[j] && Math.abs(requests[j] - head) < minDistance) {
+                    minDistance = Math.abs(requests[j] - head);
+                    closestRequestIndex = j;
+                }
+            }
+            visited[closestRequestIndex] = true;
+            totalMovement += minDistance;
+            head = requests[closestRequestIndex];
+        }
+        return totalMovement;
+    }
+
+    // Function for SCAN
+    public static int scan(int[] requests, int head, int diskSize) {
+        Arrays.sort(requests);
+        int totalMovement = 0, index = 0;
+
+        while (index < requests.length && requests[index] < head) index++;
+
+        for (int i = index; i < requests.length; i++) totalMovement += Math.abs(requests[i] - head);
+        totalMovement += Math.abs(diskSize - 1 - head);
+
+        for (int i = index - 1; i >= 0; i--) totalMovement += Math.abs(requests[i] - (diskSize - 1));
+        return totalMovement;
+    }
+
+    // Function for C-LOOK
+    public static int cLook(int[] requests, int head) {
+        Arrays.sort(requests);
+        int totalMovement = 0, index = 0;
+
+        while (index < requests.length && requests[index] < head) index++;
+
+        for (int i = index; i < requests.length; i++) totalMovement += Math.abs(requests[i] - head);
+        if (index > 0) totalMovement += Math.abs(requests[0] - head);
+
+        for (int i = 1; i < index; i++) totalMovement += Math.abs(requests[i] - requests[0]);
+        return totalMovement;
+    }
+
+    // Main function to run the algorithms
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter the number of disk requests: ");
+        int n = sc.nextInt();
+
+        int[] requests = new int[n];
+        System.out.print("Enter the disk requests: ");
+        for (int i = 0; i < n; i++) requests[i] = sc.nextInt();
+
+        System.out.print("Enter the initial head position: ");
+        int head = sc.nextInt();
+
+        System.out.print("Enter the disk size: ");
+        int diskSize = sc.nextInt();
+
+        // Display results for each algorithm
+        System.out.println("Total head movement using SSTF: " + sstf(requests, head));
+        System.out.println("Total head movement using SCAN: " + scan(requests, head, diskSize));
+        System.out.println("Total head movement using C-LOOK: " + cLook(requests, head));
+
+        sc.close();
+    }
+}

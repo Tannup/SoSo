@@ -1,0 +1,54 @@
+public class BankersAlgorithm {
+
+    public static boolean isSafeState(int processes, int resources, int[] available, int[][] max, int[][] allocation) {
+        int[][] need = new int[processes][resources];
+        for (int i = 0; i < processes; i++) {
+            for (int j = 0; j < resources; j++) {
+                need[i][j] = max[i][j] - allocation[i][j];
+            }
+        }
+
+        boolean[] finished = new boolean[processes];
+        int[] work = available.clone();
+        int[] safeSequence = new int[processes];
+        int count = 0;
+
+        while (count < processes) {
+            boolean found = false;
+            for (int i = 0; i < processes; i++) {
+                if (!finished[i] && canProceed(need[i], work)) {
+                    for (int j = 0; j < resources; j++) work[j] += allocation[i][j];
+                    safeSequence[count++] = i;
+                    finished[i] = true;
+                    found = true;
+                }
+            }
+            if (!found) {
+                System.out.println("System is not in a safe state.");
+                return false;
+            }
+        }
+
+        System.out.println("System is in a safe state. Safe sequence: ");
+        for (int i : safeSequence) System.out.print("P" + i + " ");
+        System.out.println();
+        return true;
+    }
+
+    private static boolean canProceed(int[] need, int[] work) {
+        for (int i = 0; i < need.length; i++) {
+            if (need[i] > work[i]) return false;
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        int processes = 5;
+        int resources = 3;
+        int[] available = {3, 3, 2};
+        int[][] max = {{8, 5, 3}, {3, 2, 2}, {9, 0, 2}, {2, 2, 2}, {4, 3, 3}};
+        int[][] allocation = {{0, 1, 0}, {2, 1, 0}, {3, 0, 2}, {2, 2, 1}, {0, 0, 2}};
+
+        isSafeState(processes, resources, available, max, allocation);
+    }
+}
